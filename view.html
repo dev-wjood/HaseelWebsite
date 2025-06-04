@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <!-- <meta name="viewport" content="initial-scale=1, width=device-width" /> -->
+    <!-- jQuery -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="./index2.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alatsi:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" />
+</head>
+
+<body class="hazy-background">
+
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <a href="index.html" class="logo-link">
+            <img src="resources/logo.png" alt="Logo" class="logo-image">
+        </a>
+        <div class="menu-items">
+            <a href="view.html" class="view">View</a>
+            <a href="control.html">Control</a>
+        </div>
+        <!-- <div class="user-profile">
+                <img src="account-photo.jpg" alt="User Profile">
+            </div> -->
+        <div class="dropdown">
+            <button class="dropbtn">
+                <img src="resources/menu.png" alt="menu" class="transparent-menu">
+            </button>
+            <div class="dropdown-content">
+                <a href="settings.html">Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-boxes">
+        <div class="rounded-box">
+            <div class="value">
+                <span class="value-text" id="tempreture">..</span>
+                <span class="celsiusSign">°</span>
+                <img class="icon" src="resources/tempreture.svg" alt="Icon">
+            </div>
+            <div class="name">Tempreture</div>
+            <a class="more-link" href="/moreHistory.html?id=Tempreture">More
+                <span class="moreIcon"></span>
+            </a>
+        </div>
+
+        <div class="rounded-box">
+            <div class="value">
+                <span class="value-text" id="humidity">..</span>
+                <span class="percentageSign">%</span>
+                <img class="icon" src="resources/humidity.svg" alt="Icon">
+            </div>
+            <div class="name">Humidity</div>
+            <a class="more-link" href="moreHistory.html?id=Humidity">More
+                <span class="moreIcon"></span>
+            </a>
+        </div>
+
+        <div class="rounded-box">
+            <div class="value">
+                <span class="value-text" id="soilMoisture">..</span>
+                <span class="percentageSign">%</span>
+                <img class="icon" src="resources/soilMoisture.png" alt="Icon">
+            </div>
+            <div class="name">Soil Moisture</div>
+            <a class="more-link" href="moreHistory.html?id=SoilMoisture">More
+                <span class="moreIcon"></span>
+            </a>
+        </div>
+
+        <div class="rounded-box">
+            <div>
+                <img class="nutrientIcon" src="resources/nutrient.png" alt="Icon">
+            </div>
+            <div class="nutrientText">Nutrient</div>
+            <button>
+                <a class="setThreshold" href="nutrient.html">View</a>
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        var channelID = '';
+        var tempreture = document.getElementById('tempreture');
+        var humidity = document.getElementById('humidity');
+        var soilMoisture = document.getElementById('soilMoisture');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var dropdown = document.querySelector('.dropdown');
+            dropdown.addEventListener('click', function () {
+                this.classList.toggle('active');
+            });
+
+            getRealTimeData(tempreture, 1);
+            getRealTimeData(humidity, 2);
+            getRealTimeData(soilMoisture, 4);
+        });
+
+
+        // Call the functions continuesly every 15s
+        setInterval(function () {
+            getRealTimeData(tempreture, 1);
+            getRealTimeData(humidity, 2);
+            getRealTimeData(soilMoisture, 4);
+        }, 15000);
+
+        
+        function getRealTimeData(realTimeData, field) {
+            var url = "https://api.thingspeak.com/channels/" + channelID + "/fields/" + field + "/last.json";
+
+            $.getJSON(url, function (data) {
+                var value = data["field" + field];
+                if (value < 1000) {
+                    $(realTimeData).text(value);
+                }
+            });
+        }
+
+
+    </script>
+</body>
+
+</html>

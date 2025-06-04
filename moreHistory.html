@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <!--  -->
+    <!-- <meta name="viewport" content="initial-scale=1, width=device-width"/>
+        <link rel="stylesheet" href="./index2.css"/> -->
+
+    <link rel="stylesheet" href="./index2.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alatsi:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" />
+    <!-- Include the jQuery library and Chart.js library -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body class="hazy-background">
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <a href="index.html" class="logo-link">
+            <img src="resources/logo.png" alt="Logo" class="logo-image">
+        </a>
+        <div class="menu-items">
+            <a href="view.html">View</a>
+            <a href="control.html">Control</a>
+        </div>
+        <!-- <div class="user-profile">
+                <img src="account-photo.jpg" alt="User Profile">
+            </div> -->
+        <div class="dropdown">
+            <button class="dropbtn">
+                <img src="resources/menu.png" alt="menu" class="transparent-menu">
+            </button>
+            <div class="dropdown-content">
+                <a href="settings.html">Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-10 moreHistoryBox">
+            <h1 id="elementId"></h1>
+            <div id="data-container">
+                <canvas id="myChart"></canvas>
+            </div>
+            <a class="less-link" href="view.html" id="changeableLink">Less
+                <span class="lessIcon"></span>
+            </a>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Sliding menu
+            var dropdown = document.querySelector('.dropdown');
+            dropdown.addEventListener('click', function () {
+                this.classList.toggle('active');
+            });
+
+            // Retrieve the ID of the field that clicked on using the URL query parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const elementId = urlParams.get('id');
+
+            // To specify the maximum value of x axis in the chart (for temperature & humidity)
+            var maxAxis;
+
+            // To store the retrieved data from ThingSpeak
+            var retrievedData;
+
+            // Display the field name in the header og the page
+            document.getElementById('elementId').textContent = elementId;
+
+            // Get the 'Less' element to assign a link to it based on the field number
+            const changeableLink = document.getElementById('changeableLink');
+
+            function getData() {
+                // Specify ThingSpeak API key & channel ID
+                var thingSpeakAPIKey = '';
+                var channelID = '';
+                // Calculate the date from a week ago
+                var today = new Date();
+                var weekAgo = new Date(today.getTime() - (7 * 24 * 60 * 60 * 1000));
+                // Match the ThingSpeak date format
+                var year = weekAgo.getUTCFullYear();
+                var month = String(weekAgo.getUTCMonth() + 1).padStart(2, '0');
+                var day = String(weekAgo.getUTCDate()).padStart(2, '0');
+                var hours = String(weekAgo.getUTCHours()).padStart(2, '0');
+                var minutes = String(weekAgo.getUTCMinutes()).padStart(2, '0');
+                var seconds = String(weekAgo.getUTCSeconds()).padStart(2, '0');
+
+                var startDate = year + "-" + month + "-" + day + "T" + hours + ":" + minutes + ":" + seconds + "Z";
+
+                var url = "https://api.thingspeak.com/channels/" + channelID + "/feeds.json?api_key=" + thingSpeakAPIKey + "&start=" + startDate;
+
+                $.getJSON(url, function (data) {
+                    retrievedData = data.feeds;
+
+                    switch (elementId) {
+                        case "Tempreture":
+                            calculateTemperatureAverage(retrievedData);
+                            break;
+                        case "Humidity":
+                            // field = 2;
+                            calculateHumidityAverage(retrievedData);
+                            break;
+                        case "SoilMoisture":
+                            // field = 4;
+                            calculateSoilMoistureAverage(retrievedData);
+                            break;
+                        case "Nitrogen":
+                            // field = 3;
+                            calculateNitrogenAverage(retrievedData);
+                            changeableLink.href = "nutrient.html";
+                            break;
+                        case "Phosphorus":
+                            // field = 5;
+                            calculatePhosphorusAverage(retrievedData);
+                            changeableLink.href = "nutrient.html";
+                            break;
+                        case "Potassium":
+                            // field = 6;
+                            calculatePotassiumAverage(retrievedData);
+                            changeableLink.href = "nutrient.html";
+                            break;
+                        default:
+                            break;
+                    }
+                });
+            }
+
+
+            function calculateTemperatureAverage(retrievedData) {
+                var dailyAverages = [];
+                var uniqueDates = [];
+                var dailyData = {};
+
+                for (var i = 0; i < retrievedData.length; i++) {
+                    var entry = retrievedData[i];
+                    var date = entry.created_at.split('T')[0]; // Extract the date from the 'created_at' field
+                    var value;
+
+                    // Check if the date is already added to store the unique date only
+                    if (!dailyData[date]) {
+                        dailyData[date] = {
+                            sum: 0,
+                            count: 0
+                        };
+                        uniqueDates.push(date);
+                    }
+
+                    value = entry.field1;
+                    maxAxis = 100;
+
+                    // Check if the value is not null & the value is correct and not an error value.
+                    if (value !== null && value < 3000) {
+                        dailyData[date].sum += parseFloat(value);
+                        dailyData[date].count++;
+                    }
+                }
+
+                // Calculate the daily average
+                for (var j = 0; j < uniqueDates.length; j++) {
+                    var date = uniqueDates[j];
+                    var sum = dailyData[date].sum;
+                    var count = dailyData[date].count;
+                    var average = sum / count;
+                    dailyAverages.push(average);
+                }
+                // draw the chart
+                drawChart(dailyAverages, uniqueDates)
+            }
+
+
+            //dealing the the graph
+            function drawChart(dailyAverages, uniqueDates) {
+                var ctx = document.getElementById('myChart').getContext('2d');
+
+                var chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: uniqueDates,
+                        datasets: [{
+                            label: elementId,
+                            data: dailyAverages,
+                            borderColor: '',
+                            backgroundColor: '#00b2a8',
+                            borderWidth: 1
+                        }],
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                color: 'white',
+                                max: maxAxis,
+                            }
+                        },
+                        maintainAspectRatio: false,
+
+                    }
+                });
+            }
+
+
+
+
+            // Calculate the daily average of Humidity
+            function calculateHumidityAverage(retrievedData) {
+                var dailyAverages = [];
+                var uniqueDates = [];
+                var dailyData = {};
+
+                for (var i = 0; i < retrievedData.length; i++) {
+                    var entry = retrievedData[i];
+                    var date = entry.created_at.split('T')[0];
+                    var value;
+
+                    if (!dailyData[date]) {
+                        dailyData[date] = {
+                            sum: 0,
+                            count: 0
+                        };
+                        uniqueDates.push(date);
+                    }
+
+                    value = entry.field2;
+                    maxAxis = 100;
+
+                    if (value !== null && value < 3000) {
+                        dailyData[date].sum += parseFloat(value);
+                        dailyData[date].count++;
+                    }
+                }
+
+                for (var j = 0; j < uniqueDates.length; j++) {
+                    var date = uniqueDates[j];
+                    var sum = dailyData[date].sum;
+                    var count = dailyData[date].count;
+                    var average = sum / count;
+                    dailyAverages.push(average);
+                }
+
+                drawChart(dailyAverages, uniqueDates)
+            }
+
+
+            // Calculate the daily average of Soil Moisture
+            function calculateSoilMoistureAverage(retrievedData) {
+                var dailyAverages = [];
+                var uniqueDates = [];
+                var dailyData = {};
+
+                for (var i = 0; i < retrievedData.length; i++) {
+                    var entry = retrievedData[i];
+                    var date = entry.created_at.split('T')[0]
+                    var value;
+
+                    if (!dailyData[date]) {
+                        dailyData[date] = {
+                            sum: 0,
+                            count: 0
+                        };
+                        uniqueDates.push(date);
+                    }
+
+                    value = entry.field4;
+
+                    if (value !== null && value < 3000) {
+                        dailyData[date].sum += parseFloat(value);
+                        dailyData[date].count++;
+                    }
+                }
+
+                for (var j = 0; j < uniqueDates.length; j++) {
+                    var date = uniqueDates[j];
+                    var sum = dailyData[date].sum;
+                    var count = dailyData[date].count;
+                    var average = sum / count;
+                    dailyAverages.push(average);
+                }
+
+                drawChart(dailyAverages, uniqueDates)
+            }
+
+
+            // Calculate the daily average of Nitrogen
+            function calculateNitrogenAverage(retrievedData) {
+                var dailyAverages = [];
+                var uniqueDates = [];
+                var dailyData = {};
+
+                for (var i = 0; i < retrievedData.length; i++) {
+                    var entry = retrievedData[i];
+                    var date = entry.created_at.split('T')[0];
+                    var value;
+
+                    if (!dailyData[date]) {
+                        dailyData[date] = {
+                            sum: 0,
+                            count: 0
+                        };
+                        uniqueDates.push(date);
+                    }
+
+                    value = entry.field3;
+
+                    if (value !== null && value < 3000) {
+                        dailyData[date].sum += parseFloat(value);
+                        dailyData[date].count++;
+                    }
+                }
+
+                for (var j = 0; j < uniqueDates.length; j++) {
+                    var date = uniqueDates[j];
+                    var sum = dailyData[date].sum;
+                    var count = dailyData[date].count;
+                    var average = sum / count;
+                    dailyAverages.push(average);
+                }
+
+                drawChart(dailyAverages, uniqueDates)
+            }
+
+
+            // Calculate the daily average of Phosphorus
+            function calculatePhosphorusAverage(retrievedData) {
+                var dailyAverages = [];
+                var uniqueDates = [];
+                var dailyData = {};
+
+                for (var i = 0; i < retrievedData.length; i++) {
+                    var entry = retrievedData[i];
+                    var date = entry.created_at.split('T')[0];
+                    var value;
+
+                    if (!dailyData[date]) {
+                        dailyData[date] = {
+                            sum: 0,
+                            count: 0
+                        };
+                        uniqueDates.push(date);
+                    }
+
+                    value = entry.field5;
+
+                    if (value !== null && value < 3000) {
+                        dailyData[date].sum += parseFloat(value);
+                        dailyData[date].count++;
+                    }
+                }
+
+                for (var j = 0; j < uniqueDates.length; j++) {
+                    var date = uniqueDates[j];
+                    var sum = dailyData[date].sum;
+                    var count = dailyData[date].count;
+                    var average = sum / count;
+                    dailyAverages.push(average);
+                }
+
+                drawChart(dailyAverages, uniqueDates)
+            }
+
+
+            // Calculate the daily average of Potassium
+            function calculatePotassiumAverage(retrievedData) {
+                var dailyAverages = [];
+                var uniqueDates = [];
+                var dailyData = {};
+
+                for (var i = 0; i < retrievedData.length; i++) {
+                    var entry = retrievedData[i];
+                    var date = entry.created_at.split('T')[0];
+                    var value;
+
+                    if (!dailyData[date]) {
+                        dailyData[date] = {
+                            sum: 0,
+                            count: 0
+                        };
+                        uniqueDates.push(date);
+                    }
+
+                    value = entry.field6;
+
+                    if (value !== null && value < 3000) {
+                        dailyData[date].sum += parseFloat(value);
+                        dailyData[date].count++;
+                    }
+                }
+
+                for (var j = 0; j < uniqueDates.length; j++) {
+                    var date = uniqueDates[j];
+                    var sum = dailyData[date].sum;
+                    var count = dailyData[date].count;
+                    var average = sum / count;
+                    dailyAverages.push(average);
+                }
+
+                drawChart(dailyAverages, uniqueDates)
+            }
+            getData();
+
+        });
+    </script>
+
+</body>
+
+</html>

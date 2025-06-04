@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <!-- <meta name="viewport" content="initial-scale=1, width=device-width" /> -->
+
+    <link rel="stylesheet" href="./index2.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alatsi:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" />
+</head>
+
+<body class="background">
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <a href="index.html" class="logo-link">
+            <img src="resources/logo.png" alt="Logo" class="logo-image">
+        </a>
+        <div class="menu-items">
+            <a href="view.html">View</a>
+            <a href="control.html">Control</a>
+        </div>
+        <!-- <div class="user-profile">
+            <img src="account-photo.jpg" alt="User Profile">
+        </div> -->
+        <div class="dropdown">
+            <button class="dropbtn">
+                <img src="resources/menu.png" alt="menu" class="transparent-menu">
+            </button>
+            <div class="dropdown-content">
+                <a href="settings.html">Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="string">
+            <p>From seed to Haseel</p>
+            <p>Experience the Magic of a Self-Sustaining Smart Greenhouse!</p>
+        </div>
+        <div class="bottom-section">
+            <div class="phrase">
+                <p>Join us</p>
+                <p>now</p>
+            </div>
+            <div class="buttons">
+                <button onclick="window.location.href='login.html'" class="cyan-button">
+                    Join
+                </button>
+                <button onclick="window.location.href='register.html'" class="cyan-button">
+                    Sign up
+                </button>
+            </div>
+        </div>
+    </div>
+
+</body>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var dropdown = document.querySelector('.dropdown');
+        dropdown.addEventListener('click', function () {
+            this.classList.toggle('active');
+        });
+    });
+    window.addEventListener('DOMContentLoaded', function() {
+        if (window.innerWidth > 1000) {
+            window.location.href = "error.html";
+        }
+    });
+
+</script>
+
+</html>

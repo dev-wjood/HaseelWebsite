@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <!-- <meta name="viewport" content="initial-scale=1, width=device-width" /> -->
+    <!-- jQuery -->
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="./index2.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alatsi:wght@400&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" />
+</head>
+
+<body class="hazy-background">
+    <!-- Menu Bar -->
+    <div class="menu-bar">
+        <a href="index.html" class="logo-link">
+            <img src="resources/logo.png" alt="Logo" class="logo-image">
+        </a>
+        <div class="menu-items">
+            <a href="view.html">View</a>
+            <a href="control.html">Control</a>
+        </div>
+        <!-- <div class="user-profile">
+                <img src="account-photo.jpg" alt="User Profile">
+            </div> -->
+        <div class="dropdown">
+            <button class="dropbtn">
+                <img src="resources/menu.png" alt="menu" class="transparent-menu">
+            </button>
+            <div class="dropdown-content">
+                <a href="settings.html">Settings</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="rounded-boxes">
+        <div class="rounded-box">
+            <div class="nutrientValue">
+                <span class="value-text" id="nitrogen">--</span>
+                <img class="nutrientIcons" src="resources/N.png" alt="Icon">
+            </div>
+            <div class="name">Nitrogen</div>
+            <a class="more-link" href="moreHistory.html?id=Nitrogen">More
+                <span class="moreIcon"></span>
+            </a>
+        </div>
+
+        <div class="rounded-box">
+            <div class="nutrientValue">
+                <span class="value-text" id="phosphorus">--</span>
+                <img class="nutrientIcons" src="resources/P.png" alt="Icon">
+            </div>
+            <div class="name">Phosphorus</div>
+            <a class="more-link" href="moreHistory.html?id=Phosphorus">More
+                <span class="moreIcon"></span>
+            </a>
+        </div>
+
+        <div class="rounded-box">
+            <div class="nutrientValue">
+                <span class="value-text" id="potassium">--</span>
+                <img class="nutrientIcons" src="resources/K.png" alt="Icon">
+            </div>
+            <div class="name">Potassium</div>
+            <a class="more-link" href="moreHistory.html?id=Potassium">More
+                <span class="moreIcon"></span>
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        var channelID = '';
+        var nitrogen = document.getElementById('nitrogen');
+        var phosphorus = document.getElementById('phosphorus');
+        var potassium = document.getElementById('potassium');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var dropdown = document.querySelector('.dropdown');
+            dropdown.addEventListener('click', function () {
+                this.classList.toggle('active');
+            });
+      
+            getNutrient(nitrogen, 3);
+            getNutrient(phosphorus, 5);
+            getNutrient(potassium, 6);
+            
+        });
+
+        // Call the functions continuesly every 15s
+        setInterval(function () {
+            getNutrient(nitrogen, 3);
+            getNutrient(phosphorus, 5);
+            getNutrient(potassium, 6);
+        }, 15000);
+
+
+        function getNutrient(nutrient, field) {
+            var url = "https://api.thingspeak.com/channels/" + channelID + "/fields/" + field + "/last.json";
+
+            $.getJSON(url, function (data) {
+                var value = data["field" + field];
+                $(nutrient).text(value);
+            });
+        }
+
+   
+
+    </script>
+</body>
+
+</html>

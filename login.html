@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Document</title>
+    <script type="module" src="login.js"></script>
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel='stylesheet' href='join.css'>
+</head>
+
+<body>
+    <section>
+        <div class="form-box">
+            <form>
+                <h2>Login</h2>
+                <div class="inputbox">
+                    <ion-icon name="mail-outline"></ion-icon>
+                    <input type="email" id="emailInput" required>
+                    <label>Email</label>
+                </div>
+                <div class="inputbox">
+                    <ion-icon name="lock-closed-outline"></ion-icon>
+                    <input type="password" id="passwordInput" required
+                        pattern="^(?!.*\s)(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$">
+                    <label>Password</label>
+                </div>
+                <div id="errorSignUp"></div>
+                <div class="forget">
+                    <a id="forgetPassword" href="forgetPassword.html">Forgot Password</a>
+                </div>
+                <button id="logInForward">Log In</button>
+                <div class="register">
+                    <p>Don't have an account?
+                        <a href="register.html">Sign Up</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+</body>
+
+</html>
